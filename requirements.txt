@@ -1,0 +1,5 @@
+Django==1.5.1
+elementtree==1.2.7-20070827-preview
+feedparser==5.1.3
+wsgiref==0.1.2
+yolk==0.4.3
