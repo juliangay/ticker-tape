@@ -1,0 +1,51 @@
+{% extends "bootstrap/secondary.html" %}
+
+{% block sidebar %}
+<div class="accordion" id="accordion">
+	<div class="accordion-group">
+		<div class="accordion-heading">
+			<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#">
+			<strong>All items</strong> <span class="badge pull-right">{{ entries|length }}</span>
+			</a>
+		</div>
+	</div>
+	{% for user_source in user_sources %}
+		{% if not user_source.group %}
+		<div class="accordion-group">
+			<div class="accordion-heading">
+				<a class="accordion-toggle clearfix" data-toggle="collapse" data-parent="#accordion" href="#">
+				<span class="truncate" style="float:left;width:80%;">{{ user_source.source.title }}</span> <span class="badge" style="float:right;">{{ user_source.source.entry_count }}</span>
+				</a>
+			</div>
+		</div>
+		{% endif %}
+	{% endfor %}
+	{% for group in groups %}
+	<div class="accordion-group">
+		<div class="accordion-heading">
+			<a class="accordion-toggle clearfix" data-toggle="collapse" data-parent="#accordion" href="#collapse-{{ group.id }}">
+			<span class="truncate" style="float:left;width:80%;"><strong>{{ group.name }}</strong></span> <span class="badge" style="float:right;">{{ group.entry_count }}</span>
+			</a>
+		</div>
+	    <div id="collapse-{{ group.id }}" class="accordion-body collapse">
+	      <div class="accordion-inner">
+			{% for user_source in group.usersource_set.all %}
+			<a href="#" class="clearfix"><span class="truncate" style="float:left;width:80%;">{{ user_source.source.title }}</span> <span class="badge" style="float:right;">{{ user_source.source.entry_count }}</span></a><br/>
+			{% endfor %}
+	      </div>
+	    </div>
+	</div>
+	{% endfor %}
+</div>
+{% endblock %}
+
+{% block content %}
+	{% for entry in entries %}
+		<div class="row-fluid">
+			<a href="{{ entry.link }}" target="_blank">
+	        	<div class="span2 truncate">{{ entry.source.title }}</div>
+	        	<div class="span10 truncate"><b>{{ entry.title }}</b> - {{ entry.summary }}</div>
+	    	</a>
+		</div><!--/row-->
+	{% endfor %}
+{% endblock %}

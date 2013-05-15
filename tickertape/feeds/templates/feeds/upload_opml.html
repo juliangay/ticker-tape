@@ -1,0 +1,20 @@
+{% extends "bootstrap/secondary.html" %}
+
+{% block content %}
+<div class="row-fluid">
+	<form class="form-horizontal" name="uploadForm" action="{% url "upload" %}" enctype="multipart/form-data" method="post">
+		{% csrf_token %}
+	  <div class="control-group">
+	    <label class="control-label" for="file">OMPL file</label>
+	    <div class="controls">
+	      <input id="file" type="file" name="file" size="200"/>
+	    </div>
+	  </div>
+	  <div class="control-group">
+	    <div class="controls">
+	      <button type="submit" class="btn">Upload</button>
+	    </div>
+	  </div>
+	</form>
+</div><!--/row-->
+{% endblock %}
