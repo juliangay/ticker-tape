@@ -1,5 +1,24 @@
+/* Truncate long text */
 .truncate {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+/* Fix sidebar to left-hand side */
+.sidebar-nav-fixed {
+    padding: 9px 0;
+    position:absolute;
+    width:270px;
+}
+
+.row-fluid > .span-fixed-sidebar {
+    margin-left: 290px;
+}
+
+/* Overview bootstrap settings so entry detail displayed correctly */
+@media (min-width: 1200px) {
+	.row-fluid [class*="span"] {
+		min-height: 20px;
+	}
 }

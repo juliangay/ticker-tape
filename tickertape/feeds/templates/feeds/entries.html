@@ -1,51 +1,100 @@
 {% extends "bootstrap/secondary.html" %}
 
 {% block sidebar %}
-<div class="accordion" id="accordion">
-	<div class="accordion-group">
-		<div class="accordion-heading">
-			<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#">
-			<strong>All items</strong> <span class="badge pull-right">{{ entries|length }}</span>
-			</a>
-		</div>
-	</div>
-	{% for user_source in user_sources %}
-		{% if not user_source.group %}
+<div class="sidebar-nav-fixed">
+	<div class="accordion" id="sidebar-accordion">
 		<div class="accordion-group">
 			<div class="accordion-heading">
-				<a class="accordion-toggle clearfix" data-toggle="collapse" data-parent="#accordion" href="#">
-				<span class="truncate" style="float:left;width:80%;">{{ user_source.source.title }}</span> <span class="badge" style="float:right;">{{ user_source.source.entry_count }}</span>
-				</a>
+				<div class="accordion-toggle" data-parent="#sidebar-accordion">
+					<a href="{% url 'feeds.views.entries' %}">
+						<i class="icon-globe pull-left" style="margin-right: 10px;"></i> 
+						<strong>All items</strong> <span class="badge pull-right">{{ entries|length }}</span>
+					</a>
+				</div>
 			</div>
 		</div>
-		{% endif %}
-	{% endfor %}
-	{% for group in groups %}
-	<div class="accordion-group">
-		<div class="accordion-heading">
-			<a class="accordion-toggle clearfix" data-toggle="collapse" data-parent="#accordion" href="#collapse-{{ group.id }}">
-			<span class="truncate" style="float:left;width:80%;"><strong>{{ group.name }}</strong></span> <span class="badge" style="float:right;">{{ group.entry_count }}</span>
-			</a>
+		{% for user_source in user_sources %}
+			{% if not user_source.group %}
+			<div class="accordion-group">
+				<div class="accordion-heading">
+					<div class="accordion-toggle clearfix" data-parent="#sidebar-accordion">
+						<a href="{% url 'feeds.views.entries' source_id=user_source.source.id %}">
+							<i class="icon-chevron-right pull-left" style="margin-right: 10px;"></i> 
+							<span class="truncate pull-left" style="width:67%;">{{ user_source.source.title }}</span> <span class="badge pull-right">{{ user_source.source.entry_count }}</span>
+						</a>
+					</div>
+				</div>
+			</div>
+			{% endif %}
+		{% endfor %}
+		{% for group in groups %}
+		<div class="accordion-group">
+			<div class="accordion-heading">
+				<div class="accordion-toggle clearfix" data-toggle="collapse" data-parent="#sidebar-accordion" href="#collapse-{{ group.id }}">
+					<i class="icon-folder-close pull-left" style="margin-right: 10px;"></i> 
+					<span class="truncate pull-left" style="width:67%;">{{ group.name }}</span> <span class="badge pull-right">{{ group.entry_count }}</span>
+				</div>
+			</div>
+		    <div id="collapse-{{ group.id }}" class="accordion-body collapse">
+		      <div class="accordion-inner">
+				{% for user_source in group.usersource_set.all %}
+					<a href="{% url 'feeds.views.entries' source_id=user_source.source.id %}" class="clearfix">
+						<i class="icon-chevron-right pull-left" style="margin-right: 10px;"></i> 
+						<span class="pull-left truncate" style="width:67%;">{{ user_source.source.title }}</span> 
+						<span class="badge pull-right">{{ user_source.source.entry_count }}</span>
+					</a>
+				{% endfor %}
+		      </div>
+		    </div>
 		</div>
-	    <div id="collapse-{{ group.id }}" class="accordion-body collapse">
-	      <div class="accordion-inner">
-			{% for user_source in group.usersource_set.all %}
-			<a href="#" class="clearfix"><span class="truncate" style="float:left;width:80%;">{{ user_source.source.title }}</span> <span class="badge" style="float:right;">{{ user_source.source.entry_count }}</span></a><br/>
-			{% endfor %}
-	      </div>
-	    </div>
+		{% endfor %}
 	</div>
-	{% endfor %}
 </div>
 {% endblock %}
 
 {% block content %}
+	<div class="accordion" id="entries-accordion">
 	{% for entry in entries %}
-		<div class="row-fluid">
-			<a href="{{ entry.link }}" target="_blank">
-	        	<div class="span2 truncate">{{ entry.source.title }}</div>
-	        	<div class="span10 truncate"><b>{{ entry.title }}</b> - {{ entry.summary }}</div>
-	    	</a>
-		</div><!--/row-->
+		<div class="accordion-group">
+			<div class="accordion-heading">
+				<div class="accordion-toggle">
+					<div class="row-fluid entry-header">
+			        	<span class="span2 truncate entry-header">{{ entry.source.title }}</span>
+			        	<span class="span9 truncate entry-header" data-toggle="collapse" data-parent="#entries-accordion" href="#collapse-entry-{{ entry.id }}">
+			        		<b>{{ entry.title }}</b> - {{ entry.summary }}
+			        	</span>
+			        	<span class="span1 entry-header">
+			        		<a href="{{ entry.link }}" target="_blank" class="external-link pull-right"><i class="icon-share-alt"></i></a>
+			        	</span>
+					</div><!--/row-->
+				</div>
+			</div>
+		    <div id="collapse-entry-{{ entry.id }}" class="accordion-body collapse">
+		      <div class="accordion-inner">
+					<div class="row-fluid">
+			        	<span class="span10 offset2">
+			        		{% if entry.content %}
+			        			{{ entry.content }}
+			        		{% else %}
+			        			{{ entry.summary }}
+			        		{% endif %}
+			        	</span>
+					</div><!--/row-->		      	
+		      </div>
+		    </div>
+		</div>
 	{% endfor %}
+	</div>
+
+	<div class="pagination">
+	  <ul>
+        {% if entries.has_previous %}
+            <li><a href="?page={{ entries.previous_page_number }}">Prev</a></li>
+        {% endif %}
+	    <li><a href="#">Page {{ entries.number }} of {{ entries.paginator.num_pages }}</a></li>
+        {% if entries.has_next %}
+            <li><a href="?page={{ entries.next_page_number }}">Next</a></li>
+        {% endif %}
+	  </ul>
+	</div>
 {% endblock %}

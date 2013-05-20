@@ -4,6 +4,7 @@ from views import *
 
 urlpatterns = patterns('',
     url(r'^entries$', entries, name='entries'),
+    url(r'^entries/(?P<source_id>.+)$', entries, name='source_entries'),
     url(r'^pull$', pull_feeds, name='pull'),
     url(r'^upload$', upload_opml_file, name='upload'),
 )

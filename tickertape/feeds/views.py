@@ -4,6 +4,7 @@ from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db.models import Count
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from forms import UploadOpmlFileForm
 from models import Source, Group, Entry, UserSource
 import xml.etree.ElementTree as ET
@@ -72,14 +73,26 @@ def upload_opml_file(request):
 
 
 @login_required
-def entries(request):
+def entries(request, source_id=None, entries_per_page=200):
 	user_sources = UserSource.objects.filter(user=request.user)
-	# entries = []
-	# for user_source in user_sources:
-	# 	if user_source.source.entry_count>0:
-	# 		entries += user_source.source.entry_set.all()
-	entries = Entry.objects.filter(source__usersource__user=request.user).order_by('-published_parsed')
+	if source_id:
+		entry_list = Entry.objects.filter(source__usersource__user=request.user,source=source_id).order_by('-published_parsed')
+	else:
+		entry_list = Entry.objects.filter(source__usersource__user=request.user).order_by('-published_parsed')
+
+	paginator = Paginator(entry_list, entries_per_page)
 	groups = Group.objects.filter(user=request.user)
+
+	page = request.GET.get('page')
+	try:
+		entries = paginator.page(page)
+	except PageNotAnInteger:
+		# If page is not an integer, deliver first page.
+		entries = paginator.page(1)
+	except EmptyPage:
+		# If page is out of range (e.g. 9999), deliver last page of results.
+		entries = paginator.page(paginator.num_pages)
+
 	return render_to_response('feeds/entries.html', {'user_sources': user_sources, 'groups': groups, 'entries': entries}, context_instance=RequestContext(request))
 
 
